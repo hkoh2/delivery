@@ -10,10 +10,11 @@ from datetime import datetime
 class Truck:
     MAX_PACKAGES = 16
 
-    def __init__(self, truck_id):
+    def __init__(self, truck_id, p_ids=None):
         self.MPH = 18
         self.MPM = self.MPH / 18.0  # every tick (minute) truck goes 0.3 miles
         self.id = truck_id
+        self.package_ids = p_ids
         self.packages: List[type[Package]] = []
         self.route = []
         self.delivered = []  # tuple with package id and time delivered
@@ -33,6 +34,7 @@ class Truck:
 
     def get_departure(self):
         return self.departure_time
+
     def update_location(self):
         self.total_distance += self.MPM
 
@@ -50,6 +52,10 @@ class Truck:
             self.packages.append(package)
         else:
             raise Exception('Max packages')
+
+    def load_packages(self, p_table):
+        for p_id in self.package_ids:
+            self.load_package(p_table.search(p_id))
 
     def unload_package(self, package_id):
         pass

@@ -43,7 +43,7 @@ class Dispatcher:
         # while self.active and self.pending:
         for truck in self.trucks:
             # Add ID and time of delivered packages into each truck.
-            #print(f'Departure time: {truck.get_departure()}')
+            # print(f'Departure time: {truck.get_departure()}')
             pack_to_be_routed = truck.get_packages()
             routed = self.router.route(truck.get_packages())
             truck.load_route(routed)
@@ -64,10 +64,12 @@ class Dispatcher:
         pass
 
     def deliver(self, truck):
-        print(f'*** Truck {truck.get_id()} ***')
+        # print(f'*** Truck {truck.get_id()} ***')
         delivery_log = []
-        # start_location = 'HUB'
-        end_location = 'HUB'
+
+        # keeps time of completed delivery
+        time_queue = []
+
         # Time delivered
         # [DeliveryRecord, ...]
         total_distance = 0
@@ -80,14 +82,14 @@ class Dispatcher:
             total_distance += distance
             time = 10 / 3.0 * distance
             total_time += time
-            print(f'distance - {distance} miles, time - {time} min')
+            # print(f'distance - {distance} miles, time - {time} min')
             delivery_record = DeliveryRecord(package.get_id(), distance, time)
             delivery_log.append(delivery_record)
             start_location = pack_address
 
-        print(f'total distance - {total_distance}')
-        print(f'total time     - {total_time}')
-        print('')
+        # print(f'total distance - {total_distance}')
+        # print(f'total time     - {total_time}')
+        # print('')
         truck.set_delivery_log(delivery_log)
         return truck
 
@@ -162,4 +164,10 @@ class Dispatcher:
         print(f"trucks   - {[t.get_id() for t in self.trucks]}")
         print(f"pending  - {self.pending}")
         print(f"active   - {self.active}")
-        print(f"finished - {self.finished}")
+        print(f"finished - {[i.get_id() for i in self.finished]}")
+
+    def get_not_routed(self, start=1, end=40):
+        all_packages = 40
+        for i in range(start, end):
+            pass
+

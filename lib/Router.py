@@ -20,10 +20,6 @@ class Router:
 
         route = []
 
-        # TODO: start location should be HUB!!!!
-
-        # TODO: HUB has id 0 <- start with this instead of a real package
-
         hub = Package.get_hub()
 
         packages.insert(0, hub)
