@@ -1,6 +1,7 @@
 # Dispatcher.py
 
 from lib.DeliveryRecord import DeliveryRecord
+from datetime import timedelta
 
 
 class Dispatcher:
@@ -19,6 +20,7 @@ class Dispatcher:
         self.time = 0
         # number of drivers available
         self.drivers = drivers
+        self.route_end_time = []
 
     def trucks_update(self):
         pass
@@ -45,7 +47,7 @@ class Dispatcher:
             # Add ID and time of delivered packages into each truck.
             # print(f'Departure time: {truck.get_departure()}')
             pack_to_be_routed = truck.get_packages()
-            routed = self.router.route(truck.get_packages())
+            routed = self.router.route(pack_to_be_routed)
             truck.load_route(routed)
 
         print("\033[94m --- Finished routing packages  --- \033[0m")
@@ -67,8 +69,8 @@ class Dispatcher:
         # print(f'*** Truck {truck.get_id()} ***')
         delivery_log = []
 
-        # keeps time of completed delivery
-        time_queue = []
+        # Updates departure time for the trucks that did not have drivers
+        # to delivery at start of the day
 
         # Time delivered
         # [DeliveryRecord, ...]
@@ -76,22 +78,31 @@ class Dispatcher:
         total_time = 0
         route = truck.get_route()
         start_location = route[0].get_address()
+        truck_id = truck.get_id()
         for package in route:
             pack_address = package.get_address()
             distance = self.router.get_distance(start_location, pack_address)
             total_distance += distance
             time = 10 / 3.0 * distance
             total_time += time
-            # print(f'distance - {distance} miles, time - {time} min')
-            delivery_record = DeliveryRecord(package.get_id(), distance, time)
+            delivery_time = truck.get_departure() + timedelta(minutes=total_time)
+            delivery_record = DeliveryRecord(
+                truck_id,
+                package.get_id(),
+                distance,
+                time,
+                delivery_time)
             delivery_log.append(delivery_record)
             start_location = pack_address
 
-        # print(f'total distance - {total_distance}')
-        # print(f'total time     - {total_time}')
-        # print('')
+        end_time = truck.get_departure() + timedelta(minutes=total_time)
+        print(f'Truck {truck.get_id()} End time: {end_time}')
+        self.route_end_time.append(end_time)
+        self.route_end_time.sort()  # Earliest time on index 0
+
         truck.set_delivery_log(delivery_log)
         return truck
+
 
     """
     Dispatches truck for delivery
@@ -107,6 +118,7 @@ class Dispatcher:
                 self.pending = self.trucks[i:]
                 break
             truck.driver = True
+            truck.was_pending = False
             active_drivers -= 1
             self.active.append(truck)
 
@@ -122,11 +134,21 @@ class Dispatcher:
         # keep routing until active queue is empty
         # check pending queue for any trucks after finished.
 
+        # Time of completed routes.
+
         while self.active:
             current_truck = self.active[0]
+            # Set departure time if truck was pending for driver
+            if current_truck.was_pending:
+                current_truck.set_departure(self.route_end_time[0])
+                print(f'Setting new departure: {self.route_end_time[0]}')
+                self.route_end_time.pop(0)
+            # Deliver package
             self.deliver(current_truck)
             self.finished.append(current_truck)
             del self.active[0]
+
+            # assign driver to pending once route finishes
             if self.pending:
                 print(f'Moving truck {self.pending[0].get_id()} to active queue')
                 self.active.append(self.pending[0])
@@ -135,26 +157,35 @@ class Dispatcher:
         print('')
 
     def get_delivery_log(self):
-        for truck in self.trucks:
-            total_distance = 0
-            total_time = 0
-            print(f'Delivery Record - Truck {truck.get_id()}')
-            print('------------------------------------------')
+        for truck in self.finished:
+            truck.print_all_records(self.router.get_package_table())
 
-            for record in truck.get_delivery_log():
-                p_table = self.router.get_package_table()
-                p_id = record.get_id()
-                p_time = record.get_time()
-                p_distance = record.get_distance()
-                total_distance += p_distance
-                total_time += p_time
-                address = p_table.search(p_id).get_address()
-                print(f'{p_id : >4} - {address: <25} - {p_time : >6.2f} min {p_distance : >5} miles')
+    def get_complete_log(self):
+        records = []
+        for truck in self.finished:
+            for log in truck.get_delivery_log():
+                records.append(log)
 
-            print(f'\nTotal time: {total_time : >6.2f} min | Total distance: {total_distance : >5} miles')
-            print('\n')
-            total_distance = 0
-            total_time = 0
+        sorted_records = sorted(records, key=lambda r: r.get_time())
+        sorted_records = [record for record in sorted_records if record.get_id() is not 0]
+        total_distance = 0
+        total_minutes = 0
+
+        for record in sorted_records:
+            p_id = record.get_id()
+            p_minutes = record.get_minutes()
+            p_distance = record.get_distance()
+            total_distance += p_distance
+            total_minutes += p_minutes
+            address = self.router.get_package_table().search(p_id).get_address()
+            print(f'{record.get_truck_id() : >2}'
+                  f'{p_id : >4} - {address : <25} - {p_minutes : >6.2f} min'
+                  f'{record.get_time().strftime("%H:%M:%S") : >10}'
+                  f'{p_distance : >5} miles')
+        print('')
+
+    def sort_by_time(self):
+        pass
 
     def get_delivery_log_by_time(self, start_time, end_time):
         # if package is delivered, packages should not be on the truck
@@ -170,4 +201,3 @@ class Dispatcher:
         all_packages = 40
         for i in range(start, end):
             pass
-

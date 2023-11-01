@@ -4,17 +4,14 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
 import csv
-from pprint import pprint
 from lib.Hash import ChainingHashTable
 from lib.Package import Package
 from lib.Truck import Truck
 from lib.Router import Router
 from lib.Dispatcher import Dispatcher
+from pprint import pprint
 
 
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
     test_pack = Package.get_hub()
@@ -71,9 +68,13 @@ if __name__ == '__main__':
     truck2 = Truck(2, truck2_package_ids)
     active_trucks.append(truck2)
 
-    truck3_package_ids = [3, 4, 5, 10, 40]
+    truck3_package_ids = [3, 4, 5, 6, 39, 40]
     truck3 = Truck(3, truck3_package_ids)
     active_trucks.append(truck3)
+
+    # truck4_package_ids = [14, 15]
+    # truck4 = Truck(4, truck4_package_ids)
+    # active_trucks.append(truck4)
 
     for truck in active_trucks:
         truck.load_packages(packages_table)
@@ -92,4 +93,10 @@ if __name__ == '__main__':
 
     dispatcher.status()
 
+    all_package_ids = [i for i in range(1, 41)]
+    routed_packages = truck1_package_ids + truck2_package_ids + truck3_package_ids
+    remaining_packages = [i for i in all_package_ids if i not in routed_packages]
+    print(remaining_packages)
 
+
+    dispatcher.get_complete_log()

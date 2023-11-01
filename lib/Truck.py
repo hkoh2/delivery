@@ -4,13 +4,15 @@
 from pprint import pprint
 from lib.Package import Package
 from typing import List
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Truck:
     MAX_PACKAGES = 16
 
     def __init__(self, truck_id, p_ids=None):
+        # need to set a different departure time
+        self.was_pending: bool = True
         self.MPH = 18
         self.MPM = self.MPH / 18.0  # every tick (minute) truck goes 0.3 miles
         self.id = truck_id
@@ -19,12 +21,36 @@ class Truck:
         self.route = []
         self.delivered = []  # tuple with package id and time delivered
         self.delivery_log = None
-        self.driver = False
+        self.driver: bool = False
         self.total_distance = 0
         self.destination_distance = 0
         current_time = datetime.today()
         # current_time.replace(hour=8, minute=0, second=0)
         self.departure_time = current_time.replace(hour=8, minute=0, second=0)
+
+    def print_all_records(self, p_table):
+        total_distance = 0
+        total_time = 0
+        print(f'Delivery Record - Truck {self.get_id()}')
+        print('------------------------------------------')
+        departure_time = self.get_departure()
+        print(f'Departure time: {departure_time.strftime("%H:%M:%S")}')
+
+        for record in self.get_delivery_log():
+            p_id = record.get_id()
+            p_time = record.get_minutes()
+            p_distance = record.get_distance()
+            total_distance += p_distance
+            total_time += p_time
+            address = p_table.search(p_id).get_address()
+            print(f'{p_id : >4} - {address: <25} - {p_time : >6.2f} min'
+                  f'{record.get_time().strftime("%H:%M:%S") : >10}'
+                  f'{p_distance : >5} miles')
+
+        print(f'\nTotal time: {total_time : >6.2f} min | Total distance: {total_distance : >5.1f} miles')
+        end_time = departure_time + timedelta(minutes=total_time)
+        print(f'Arrival at HUB: {end_time.strftime("%H:%M:%S")}')
+        print('\n')
 
     def set_delivery_log(self, d_log):
         self.delivery_log = d_log
@@ -34,6 +60,9 @@ class Truck:
 
     def get_departure(self):
         return self.departure_time
+
+    def set_departure(self, departure_time):
+        self.departure_time = departure_time
 
     def update_location(self):
         self.total_distance += self.MPM
