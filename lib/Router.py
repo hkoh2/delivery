@@ -9,9 +9,11 @@ class Router:
         self.distances = distance_data
         self.addresses = address_data
 
-    def route(self, packages):
+    def get_package_address(self, p_id):
+        package = self.package_table.search(p_id)
+        return f'{package.get_address()}, {package.city}, {package.state} {package.package_zip}'
 
-        print(f'Packages to be routed - {[p.get_id() for p in packages]}')
+    def route(self, packages):
 
         if not packages:
             return []
@@ -43,8 +45,6 @@ class Router:
                     shortest = dist
                     next_location = package
                     remove_index = i
-
-            # print("shortest - ", shortest)
             route.append(next_location)
             shortest = 10000
             del packages[remove_index]
@@ -54,8 +54,6 @@ class Router:
         del packages[0]
         route.append(hub)
 
-        print(f'Routed packages       - {[p.get_id() for p in route]}')
-        print('')
         return route
 
     # Returns distance between two addresses
@@ -69,5 +67,3 @@ class Router:
 
     def get_package_table(self):
         return self.package_table
-
-k

@@ -25,6 +25,12 @@ class Package:
     def get_address(self):
         return self.address
 
+    def set_address(self, address, city, state, p_zip):
+        self.address = address
+        self.city = city
+        self.state = state
+        self.package_zip = p_zip
+
     def get_delivery_time(self):
         return self.delivery_time
 
@@ -33,6 +39,9 @@ class Package:
 
     def get_weight(self):
         return self.weight
+
+    def to_string(self):
+        return f'id: {self.id} address: {self.address}'
 
     @staticmethod
     def get_hub():

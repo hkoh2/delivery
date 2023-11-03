@@ -2,9 +2,10 @@
 
 from datetime import datetime, timedelta
 
+
 class DeliveryRecord:
 
-    def __init__(self, truck_id, p_id, distance, minutes, d_time):
+    def __init__(self, truck_id, p_id, distance, minutes, d_time, departure):
         # truck id
         self.truck_id = truck_id
         # package id
@@ -14,7 +15,11 @@ class DeliveryRecord:
         # time delivered
         self.minutes = minutes
         self.delivery_time = d_time
+        self.departure = departure
         self.last = False
+
+    def get_truck_id(self):
+        return self.truck_id
 
     def get_time(self):
         return self.delivery_time
@@ -23,7 +28,7 @@ class DeliveryRecord:
         return self.minutes
 
     def get_delivery_time(self):
-        pass
+        return self.delivery_time
 
     def set_minutes(self, d_time):
         self.minutes = d_time
@@ -39,6 +44,9 @@ class DeliveryRecord:
 
     def get_truck_id(self):
         return self.truck_id
+
+    def get_departure(self):
+        return self.departure
 
     def to_string(self) -> str:
         pass
