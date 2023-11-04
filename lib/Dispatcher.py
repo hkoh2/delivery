@@ -70,6 +70,7 @@ class Dispatcher:
         for package in route:
             pack_address = package.get_address()
             distance = self.router.get_distance(start_location, pack_address)
+            weight = package.get_weight()
             total_distance += distance
             time = 10 / 3.0 * distance
             total_time += time
@@ -80,7 +81,8 @@ class Dispatcher:
                 distance,
                 time,
                 delivery_time,
-                truck.get_departure()
+                truck.get_departure(),
+                weight
             )
             delivery_log.append(delivery_record)
             start_location = pack_address
@@ -136,9 +138,14 @@ class Dispatcher:
                 self.active.append(self.pending[0])
                 del self.pending[0]
 
-    def get_delivery_log(self):
-        for truck in self.finished:
-            truck.print_all_records(self.router.get_package_table())
+    def get_delivery_log(self, t_id=0):
+        if t_id == 0:
+            for truck in self.finished:
+                truck.print_all_records(self.router.get_package_table())
+        else:
+            for truck in self.finished:
+                if truck.get_id() == t_id:
+                    truck.print_all_records(self.router.get_package_table())
 
     def get_complete_log(self):
         records = []
@@ -231,10 +238,6 @@ class Dispatcher:
                   f'{delivery_time : >10} | '
                   f'{msg : <10} '
                   )
-
-
-    def sort_by_time(self):
-        pass
 
     def get_delivery_log_by_time(self, start_time, end_time):
         # if package is delivered, packages should not be on the truck

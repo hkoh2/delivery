@@ -82,13 +82,6 @@ if __name__ == '__main__':
     )
 
     all_packages = truck1_package_ids + truck2_package_ids + truck3_package_ids
-    counted = []
-    wtf = []
-    for i in all_packages:
-        if i not in counted:
-            counted.append(i)
-        else:
-            wtf.append(i)
 
     for truck in active_trucks:
         print(f'truck {truck.get_id()} has {len(truck.package_ids)} packages')
@@ -108,12 +101,12 @@ if __name__ == '__main__':
     print('WGUPS ROUTING PROGRAM')
     print('')
     print(f'Total number of packages: {len(all_packages)}')
+    clear_screen()
     while running:
         # Name of app
-        clear_screen()
         print('')
         print('1. Show delivery records for all packages')
-        print('1. Show delivery records for all packages by truck')
+        print('2. Show delivery records for all packages by truck')
         print('3. Show all packages by time')
         print('4. Overview - TODO')
         print('0. Exit')
@@ -137,6 +130,10 @@ if __name__ == '__main__':
                 dispatcher.get_complete_log()
             case '2':
                 clear_screen()
+                trucks_text = ' '.join([str(truck.get_id()) for truck in active_trucks])
+                print(f'Available truck ids: {trucks_text}' )
+                truck_selected = input(f'Enter truck id (0 for all trucks): ')
+                clear_screen()
                 updated_package = packages_table.search(9)
                 updated_package.set_address(
                     '410 S State St',
@@ -147,7 +144,7 @@ if __name__ == '__main__':
                 dispatcher = Dispatcher(active_trucks, router, 2)
                 dispatcher.generate_route()
                 dispatcher.dispatch_routes()
-                dispatcher.get_delivery_log()
+                dispatcher.get_delivery_log(int(truck_selected))
             case '3':
                 clear_screen()
                 print(f'1. 9:00')
@@ -191,6 +188,9 @@ if __name__ == '__main__':
                 dispatcher.dispatch_routes()
 
                 dispatcher.get_log_by_time(time_entered)
+            case '4':
+                clear_screen()
+                print(f'Overview of trucks and packages')
             case _:
                 clear_screen()
                 pass

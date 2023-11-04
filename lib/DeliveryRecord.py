@@ -1,11 +1,9 @@
 # DeliveryRecord.py
 
-from datetime import datetime, timedelta
-
 
 class DeliveryRecord:
 
-    def __init__(self, truck_id, p_id, distance, minutes, d_time, departure):
+    def __init__(self, truck_id, p_id, distance, minutes, d_time, departure, weight):
         # truck id
         self.truck_id = truck_id
         # package id
@@ -16,6 +14,7 @@ class DeliveryRecord:
         self.minutes = minutes
         self.delivery_time = d_time
         self.departure = departure
+        self.weight = weight
         self.last = False
 
     def get_truck_id(self):
@@ -42,11 +41,11 @@ class DeliveryRecord:
     def get_id(self):
         return self.id
 
-    def get_truck_id(self):
-        return self.truck_id
-
     def get_departure(self):
         return self.departure
+
+    def get_weight(self):
+        return self.weight
 
     def to_string(self) -> str:
         pass

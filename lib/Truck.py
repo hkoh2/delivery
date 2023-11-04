@@ -11,7 +11,6 @@ class Truck:
     MAX_PACKAGES = 16
 
     def __init__(self, truck_id, p_ids=None, p_table=None):
-        # need to set a different departure time
         self.was_pending: bool = True
         self.MPH = 18
         self.MPM = self.MPH / 18.0  # every tick (minute) truck goes 0.3 miles
@@ -30,19 +29,20 @@ class Truck:
     def print_all_records(self, p_table):
         total_distance = 0
         total_time = 0
+        total_weight = 0
         print(f'Delivery Record - Truck {self.get_id()}')
-        print('------------------------------------------')
         departure_time = self.get_departure()
-        print(f'Departure time: {departure_time.strftime("%H:%M:%S")}')
-
-        print(f'  ID - ADDRESS' + ' ' * 34 + '|    DISTANCE |        TIME |  DELIVERED | DELIVER BY |')
-        print('-' * 111)
+        print('')
+        print(f'  ID - ADDRESS' + ' ' * 34 + '|    DISTANCE |   WEIGHT |        TIME |  DELIVERED | DELIVER BY |')
+        print('-' * 123)
         for record in self.get_delivery_log():
             p_id = record.get_id()
             p_time = record.get_minutes()
             p_distance = record.get_distance()
+            p_weight = record.get_weight()
             total_distance += p_distance
             total_time += p_time
+            total_weight += p_weight
             package = p_table.search(p_id)
             address = package.get_address()
             delivery_time = package.get_delivery_time()
@@ -60,15 +60,21 @@ class Truck:
                 on_time_msg = 'On time' if on_time else 'Late'
             print(f'{p_id : >4} - {address: <40} | '
                   f'{p_distance : >5} miles | '
+                  f'{p_weight : >5.1f} kg | '
                   f' {p_time : >6.2f} min | '
                   f'{delivered_time : >10} | '
                   f'{delivery_time : >10} | '
                   f'{on_time_msg : <8} '
                   )
 
-        print(f'\nTotal time: {total_time : >6.2f} min | Total distance: {total_distance : >5.1f} miles')
+        print('-' * 123)
+        print(f'  TOTAL' + ' ' * 41 + f'| {total_distance : >5.1f} miles |'
+              f' {total_weight : >5.1f} kg |  {total_time : >6.2f} min |  '
+              f'          |            |'
+              )
         end_time = departure_time + timedelta(minutes=total_time)
-        print(f'Arrival at HUB: {end_time.strftime("%H:%M:%S")}')
+        print('')
+        print(f'Departure: {departure_time.strftime("%H:%M:%S")} - Arrival: {end_time.strftime("%H:%M:%S")}')
         print('\n')
 
     def set_delivery_log(self, d_log):
