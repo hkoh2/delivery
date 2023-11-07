@@ -15,7 +15,8 @@ class Package:
         self.address = address
         self.city = city
         self.package_zip = package_zip
-        self.delivery_time = delivery_time
+        self.delivery_deadline = delivery_time
+        self.delivered = False
         self.weight = int(weight)
         self.notes = notes
 
@@ -25,17 +26,23 @@ class Package:
     def get_address(self):
         return self.address
 
+    def get_full_address(self):
+        return f'{self.address}, {self.city}, {self.state} {self.package_zip}'
+
     def set_address(self, address, city, state, p_zip):
         self.address = address
         self.city = city
         self.state = state
         self.package_zip = p_zip
 
-    def get_delivery_time(self):
-        return self.delivery_time
+    def get_delivery_deadline(self):
+        return self.delivery_deadline
 
     def set_delivery_time(self, d_time):
-        self.delivery_time = d_time
+        self.delivery_deadline = d_time
+
+    def get_delivery_status(self):
+        return self.delivered
 
     def get_weight(self):
         return self.weight

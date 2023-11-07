@@ -22,51 +22,45 @@ class Dispatcher:
         self.drivers = drivers
         self.route_end_time = []
 
-    def trucks_update(self):
-        pass
+    def get_all_truck_delivery_log(self):
+        records = []
+        for truck in self.finished:
+            for log in truck.get_delivery_log():
+                records.append(log)
+        return records
 
-    def dispatch_trucks(self):
-        pass
+    def get_package_detail(self, p_id):
+        all_records = self.get_all_truck_delivery_log()
+        for record in all_records:
+            package_id = record.get_id()
+            if p_id == package_id:
+                package = self.router.get_package_table().search(p_id)
+                return (f'ID        : {p_id}\n'
+                        f'On truck  : {record.get_truck_id()}\n'
+                        f'Address   : {package.get_full_address()}\n'
+                        f'Weight    : {package.get_weight()}\n'
+                        f'Delivered : {record.get_time().strftime("%H:%M %p")}\n'
+                        f'Deliver by: {package.get_delivery_deadline()}'
+                        )
 
     def load_router(self, router):
-        """Router for distance"""
         self.router = router
 
     def generate_route(self):
-
-        # while self.active and self.pending:
         for truck in self.trucks:
-            # Add ID and time of delivered packages into each truck.
-            # print(f'Departure time: {truck.get_departure()}')
             truck.load_packages(self.router.get_package_table())
             pack_to_be_routed = truck.get_packages()
             routed = self.router.route(pack_to_be_routed)
             truck.load_route(routed)
 
-    def end(self):
-        return not self.active and not self.pending
-
-    def tick(self):
-        self.time += 1
-        """ TODO: Need to check with trucks for update
-                  on where the location is
-        """
-        self.trucks_update()
-
     def deliver(self, truck):
-        # print(f'*** Truck {truck.get_id()} ***')
         delivery_log = []
-
-        # Updates departure time for the trucks that did not have drivers
-        # to delivery at start of the day
-
-        # Time delivered
-        # [DeliveryRecord, ...]
         total_distance = 0
         total_time = 0
         route = truck.get_route()
         start_location = route[0].get_address()
         truck_id = truck.get_id()
+
         for package in route:
             pack_address = package.get_address()
             distance = self.router.get_distance(start_location, pack_address)
@@ -98,9 +92,6 @@ class Dispatcher:
     Dispatches truck for delivery
     """
     def dispatch_routes(self):
-
-        # assign available drivers to truck
-        # self.trucks should have truck in order by departure time
         active_drivers = self.drivers
         for i, truck in enumerate(self.trucks):
             if active_drivers < 1:
@@ -110,17 +101,6 @@ class Dispatcher:
             truck.was_pending = False
             active_drivers -= 1
             self.active.append(truck)
-
-        # while self.active or self.pending
-        """
-        TODO: we don't know who will finish first when the delivery is complete.
-        will need to go through the lo
-        """
-
-        # keep routing until active queue is empty
-        # check pending queue for any trucks after finished.
-
-        # Time of completed routes.
 
         while self.active:
             current_truck = self.active[0]
@@ -148,10 +128,7 @@ class Dispatcher:
                     truck.print_all_records(self.router.get_package_table())
 
     def get_complete_log(self):
-        records = []
-        for truck in self.finished:
-            for log in truck.get_delivery_log():
-                records.append(log)
+        records = self.get_all_truck_delivery_log()
 
         sorted_records = sorted(records, key=lambda r: r.get_time())
         sorted_records = [record for record in sorted_records if record.get_id() is not 0]
@@ -170,7 +147,7 @@ class Dispatcher:
             total_minutes += p_time
             package = self.router.get_package_table().search(p_id)
             address = package.get_address()
-            delivery_time = package.get_delivery_time()
+            delivery_time = package.get_delivery_deadline()
             delivered_time = record.get_time().strftime("%H:%M:%S")
             on_time = True
             on_time_msg = ''
@@ -210,7 +187,7 @@ class Dispatcher:
                 continue
             address = self.router.get_package_address(p_id)
             package = self.router.get_package_table().search(p_id)
-            delivery_time = package.get_delivery_time()
+            delivery_time = package.get_delivery_deadline()
             distance = record.get_distance()
             distance_travelled = 0
             distance_left = 0
@@ -239,17 +216,8 @@ class Dispatcher:
                   f'{msg : <10} '
                   )
 
-    def get_delivery_log_by_time(self, start_time, end_time):
-        # if package is delivered, packages should not be on the truck
-        pass
-
     def status(self):
         print(f"trucks   - {[t.get_id() for t in self.trucks]}")
         print(f"pending  - {self.pending}")
         print(f"active   - {self.active}")
         print(f"finished - {[i.get_id() for i in self.finished]}")
-
-    def get_not_routed(self, start=1, end=40):
-        all_packages = 40
-        for i in range(start, end):
-            pass

@@ -1,51 +1,50 @@
 # Hash.py
-# HashTable class using chaining - START
+
 class ChainingHashTable:
-    # Constructor with optional initial capacity parameter.
-    # Assigns all buckets with an empty list.
-    def __init__(self, initial_capacity=10):
-        # initialize the hash table with empty bucket list entries.
-        self.table = []
-        for i in range(initial_capacity):
-            self.table.append([])
+    def __init__(self, capacity=10):
+        # Initialize buckets with lists
+        self.buckets = [[] for _ in range(capacity)]
 
-    # Inserts a new item into the hash table.
-    def insert(self, key, item):
-        # get the bucket list where this item will go.
-        bucket = hash(key) % len(self.table)
-        bucket_list = self.table[bucket]
+    '''
+    Inserts a new value into the chaining hash table.
+    '''
+    def insert(self, key, val):
+        # Find the bucket for the key provided
+        bucket_key = hash(key) % len(self.buckets)
+        bucket_list = self.buckets[bucket_key]
 
-        # update key if it is already in the bucket
+        # Value is updated if the key exists
         for kv in bucket_list:
             if kv[0] == key:
-                kv[1] = item
+                kv[1] = val
                 return True
 
-        # if not, insert the item to the end of the bucket list.
-        key_value = [key, item]
-        bucket_list.append(key_value)
+        # If key is not found, add as a new element in the bucket
+        bucket_list.append([key, val])
         return True
 
-    # Searches for an item with matching key in the hash table.
-    # Returns the item if found, or None if not found.
+    '''
+    Search for value by key. Returns value if key exists. None if does not exist.
+    '''
     def search(self, key):
-        # get the bucket list where this key would be.
-        bucket = hash(key) % len(self.table)
-        bucket_list = self.table[bucket]
+        # Find the bucket for the key provided
+        bucket_key = hash(key) % len(self.buckets)
+        bucket_list = self.buckets[bucket_key]
 
-        # search for the key in the bucket list
+        # search for the key in the bucket
         for kv in bucket_list:
             if kv[0] == key:
                 return kv[1]
         return None
 
-    # Removes an item with matching key from the hash table.
+    '''
+    Remove key and value if key exists in the hash table'''
     def remove(self, key):
-        # get the bucket list where this item will be removed from.
-        bucket = hash(key) % len(self.table)
-        bucket_list = self.table[bucket]
+        # Find the bucket for the key provided
+        bucket_key = hash(key) % len(self.buckets)
+        bucket_list = self.buckets[bucket_key]
 
-        # remove the item from the bucket list if it is present.
+        # Remove key value if it exists
         for kv in bucket_list:
             if kv[0] == key:
-                bucket_list.remove([kv[0],kv[1]])
+                bucket_list.remove([kv[0], kv[1]])
