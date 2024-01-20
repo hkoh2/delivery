@@ -42,6 +42,8 @@ class Router:
         # Set the starting and next destination to search for shortest distance
         start_location = packages.pop(0)
         next_location = packages[0]
+
+        # Shortest distance to compare distance between all available destinations.
         shortest = 10000
         remove_index = 0
 
@@ -55,21 +57,27 @@ class Router:
                 next_address = package.get_address()
                 dist = self.get_distance(start_address, next_address)
 
-                # Update the shortest distance if current starting and next
+                # Update the shortest distance if starting and next
                 # location is shorter
                 if dist < shortest:
                     shortest = dist
                     next_location = package
+                    # Index of the package with the shortest distance currently.
+                    # Need this to remove the package with the shortest distance
                     remove_index = i
             route.append(next_location)
-            # reset shortest once the shortest path is found for next package
+            # reset the shortest value once the iteration is finished with
+            # finding the shortest path.
             shortest = 10000
             # Remove packages that have been routed
             del packages[remove_index]
+            # Updating next destination to find the next shortest distance
             next_location = packages[0]
+            # Remove index is reset to find the next package to be moved to routed status.
             remove_index = 0
         route.append(next_location)
         del packages[0]
+        # Returning to the hub after deliveries are completed.
         route.append(hub)
 
         return route

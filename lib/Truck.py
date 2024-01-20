@@ -42,6 +42,12 @@ class Truck:
             total += record.get_distance()
         return total
 
+    def get_distance_last(self):
+        total = 0
+        for record in self.delivery_log[:-1]:
+            total += record.get_distance()
+        return total
+
     # Return total weight of packages
     def get_weight(self):
         total = 0
@@ -66,7 +72,7 @@ class Truck:
         print('')
         print(f'  ID - ADDRESS' + ' ' * 34 + '|    DISTANCE |   WEIGHT |        TIME |  DELIVERED | DELIVER BY |')
         print('-' * 123)
-        for record in self.get_delivery_log():
+        for record in self.get_delivery_log()[:-1]:
 
             # Total values for packages and delivery
             p_id = record.get_id()

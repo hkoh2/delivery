@@ -73,7 +73,7 @@ if __name__ == '__main__':
     active_trucks.append(truck1)
 
     truck2_package_ids = ([3, 18, 36, 38] +
-                          [1, 2, 4, 5, 6, 7, 8, 10, 11, 12, 40, 25])
+                           [1, 2, 4, 5, 6, 7, 8, 10, 11, 12, 40, 25])
     truck2 = Truck(2, truck2_package_ids, packages_table)
     # Adjusting departure time of truck 2
     truck2.set_departure(datetime.today().replace(hour=9, minute=5, second=0))
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         print('2. Show delivery records for all packages by truck')
         print('3. Show all packages by time')
         print('4. Overview of delivery trucks')
-        print('5. Package details')
+        print('5. Specific package delivery status by time')
         print('0. Exit')
         user_input = input("Choose an option from above: ")
 
@@ -212,6 +212,7 @@ if __name__ == '__main__':
 
                 # Initialize total values for display
                 delivery_total_distance = 0
+                delivery_total_distance_last = 0
                 delivery_total_packages = 0
                 delivery_total_time = 0
                 delivery_total_weight = 0
@@ -225,12 +226,14 @@ if __name__ == '__main__':
                     total_weight = truck.get_weight()
                     total_time = truck.get_total_time()
                     total_distance = truck.get_total_distance()
+                    total_distance_last = truck.get_distance_last()
 
                     # Total values of all trucks and packages
                     delivery_total_weight += total_weight
                     delivery_total_packages += total_packages
                     delivery_total_time += total_time
                     delivery_total_distance += total_distance
+                    delivery_total_distance_last += total_distance_last
 
                     # Time conversion for formatting
                     hr = int(total_time / 60)
@@ -245,10 +248,10 @@ if __name__ == '__main__':
                           f'Weight: {total_weight} kg | '
                           f'Departure: {departure_time.strftime("%H:%M")} | '
                           f'Arrival: {arrival_time.strftime("%H:%M")} | '
-                          f'Time taken: {hr}:{minute} | '
-                          f'Total distance: {total_distance} miles'
+                          f'Time taken: {hr}:{minute :02d} | '
+                          f'Total distance: {total_distance_last : .1f} miles  | '
                           )
-                print('-' * 87)
+                print('-' * 127)
 
                 d_hr = int(delivery_total_time / 60)
                 d_minute = int(delivery_total_time % 60)
@@ -262,7 +265,7 @@ if __name__ == '__main__':
                       f'Departure: {earliest.strftime("%H:%M")} | '
                       f'Arrival: {last.strftime("%H:%M")} | '
                       f'Time taken: {d_hr}:{d_minute} | '
-                      f'Total distance: {delivery_total_distance} miles'
+                      f'Total distance: {delivery_total_distance_last : .1f} miles | '
                       )
 
                 # Shows the earliest departure time and latest arrival time.
@@ -292,8 +295,44 @@ if __name__ == '__main__':
                     clear_screen()
                     continue
 
-                # Display package details.
-                print(dispatcher.get_package_detail(p_id))
+                p_time = input('Enter time (HH:MM): ')
+
+                # validate time input
+                try:
+                    time_entered = (datetime
+                                    .strptime(p_time, '%H:%M')
+                                    .strftime("%H:%M:%S"))
+                except ValueError:
+                    input('Invalid time. Press enter to continue.')
+                    continue
+
+                update_time = (datetime
+                               .strptime('10:20', '%H:%M')
+                               .strftime("%H:%M:%S"))
+
+                # If separates package by selected time
+                if time_entered > update_time:
+                    updated_package = packages_table.search(9)
+                    updated_package.set_address(
+                        '410 S State St',
+                        'Salt Lake City',
+                        'UT',
+                        '84111'
+                    )
+                else:
+                    updated_package = packages_table.search(9)
+                    updated_package.set_address(
+                        '300 State St',
+                        'Salt Lake City',
+                        'UT',
+                        '84103'
+                    )
+
+                # Display all package status by time
+                dispatcher = Dispatcher(active_trucks, router, 2)
+                dispatcher.generate_route()
+                dispatcher.dispatch_routes()
+                print(dispatcher.get_package_detail(p_id, time_entered))
                 print('')
             case _:
                 clear_screen()
