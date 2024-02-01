@@ -1,9 +1,5 @@
 # main.py
 
-# Student ID - 010262309
-# Name - Han Koh
-# WGUPS ROUTING PROGRAM
-
 import csv
 from lib.Hash import ChainingHashTable
 from lib.Package import Package
