@@ -26,3 +26,4 @@
 ## Tech <a id="tech"></a>
 
 - Python 3.11.5
+- 
